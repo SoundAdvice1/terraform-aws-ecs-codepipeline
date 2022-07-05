@@ -429,7 +429,7 @@ resource "aws_codepipeline_webhook" "webhook" {
 }
 
 module "github_webhooks" {
-  source  = "git@github.com:mihaiplesa/terraform-github-repository-webhooks.git"
+  source  = "git@github.com:mihaiplesa/terraform-github-repository-webhooks.git?ref=mplesa-github-provider-upgrade"
 
   enabled              = module.this.enabled && var.webhook_enabled ? true : false
   github_organization  = var.repo_owner
