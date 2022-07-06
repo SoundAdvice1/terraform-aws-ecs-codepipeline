@@ -8,6 +8,12 @@ variable "service_name" {
   description = "ECS Service Name"
 }
 
+variable "github_connection_arn" {
+  type        = string
+  description = "Github Connection ARN that can be done using aws codestar-connections create-connection --provider-type GitHub --connection-name MyConnection"
+  default     = ""
+}
+
 variable "github_oauth_token" {
   type        = string
   description = "GitHub OAuth Token with permissions to access private repositories"
