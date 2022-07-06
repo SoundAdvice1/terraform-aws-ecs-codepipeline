@@ -128,6 +128,7 @@ resource "aws_iam_role_policy_attachment" "codebuild" {
   policy_arn = join("", aws_iam_policy.codebuild.*.arn)
 }
 
+
 module "codebuild_label" {
   source     = "cloudposse/label/null"
   version    = "0.25.0"
@@ -241,7 +242,7 @@ resource "aws_iam_role_policy_attachment" "codebuild_s3" {
 }
 
 resource "aws_codepipeline" "default" {
-  count    = module.this.enabled && var.github_connection_arn != "" ? 1 : 0
+  count    = module.this.enabled && var.github_oauth_token != "" ? 1 : 0
   name     = module.codepipeline_label.id
   role_arn = join("", aws_iam_role.default.*.arn)
 
@@ -261,18 +262,19 @@ resource "aws_codepipeline" "default" {
     name = "Source"
 
     action {
-      category         = "Source"
-      owner            = "AWS"
       name             = "Source"
-      provider         = "CodeStarSourceConnection"
+      category         = "Source"
+      owner            = "ThirdParty"
+      provider         = "GitHub"
       version          = "1"
       output_artifacts = ["code"]
 
       configuration = {
-        ConnectionArn        = var.github_connection_arn
-        FullRepositoryId     = format("%s/%s", var.repo_owner, var.repo_name)
-        BranchName           = var.branch
-        OutputArtifactFormat = "CODE_ZIP"
+        OAuthToken           = var.github_oauth_token
+        Owner                = var.repo_owner
+        Repo                 = var.repo_name
+        Branch               = var.branch
+        PollForSourceChanges = var.poll_source_changes
       }
     }
   }
@@ -415,7 +417,7 @@ resource "aws_codepipeline_webhook" "webhook" {
   name            = module.codepipeline_label.id
   authentication  = var.webhook_authentication
   target_action   = var.webhook_target_action
-  target_pipeline = join("", aws_codepipeline.default.*.name)
+  target_pipeline = join("", aws_codepipeline.bitbucket.*.name)
 
   authentication_configuration {
     secret_token = local.webhook_secret
